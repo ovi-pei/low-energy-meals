@@ -1,18 +1,17 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // Added Suspense import
 import { meals } from "../../data/meals";
 
-export default function ResultsPage() {
+// --- PART 1: The Logic Component ---
+function ResultsContent() {
   const searchParams = useSearchParams();
   const itemsString = searchParams.get("items");
   const energyLevel = searchParams.get("energy");
   
-  // State to track what has been saved (for button feedback)
   const [savedIds, setSavedIds] = useState<number[]>([]);
 
-  // On load, check what is already saved in LocalStorage
   useEffect(() => {
     const saved = localStorage.getItem("savedMeals");
     if (saved) {
@@ -39,7 +38,6 @@ export default function ResultsPage() {
     const hasIngredient = meal.ingredients.some(ing => 
       selectedIngredients.includes(ing.toLowerCase())
     );
-    // Strict match for 'very low', relaxed match for 'medium'
     const isEnergyMatch = energyLevel === "very low" 
         ? meal.energyLevel === "very low" 
         : true; 
@@ -48,8 +46,7 @@ export default function ResultsPage() {
   });
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
-      {/* Header with link to Saved Page */}
+    <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
         <h1 style={{ fontSize: "1.5rem", margin: 0 }}>Results</h1>
         <Link href="/saved" style={{ textDecoration: "underline", fontSize: "0.9rem" }}>
@@ -98,7 +95,6 @@ export default function ResultsPage() {
                 <strong>You need:</strong> {meal.ingredients.join(", ")}
               </p>
 
-              {/* SAVE BUTTON */}
               <button 
                 onClick={() => toggleSave(meal.id)}
                 style={{
@@ -121,6 +117,15 @@ export default function ResultsPage() {
       <Link href="/ingredients" style={{ display: "block", marginTop: "3rem", textAlign: "center", textDecoration: "underline" }}>
         ← Start Over
       </Link>
-    </main>
+    </div>
+  );
+}
+
+// --- PART 2: The Wrapper Component (Export Default) ---
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<div style={{padding: "2rem", textAlign: "center"}}>Loading meals...</div>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
