@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 const STAPLES = [
   "Eggs", "Bread", "Rice", "Noodles", 
-  "Chicken", "Cheese", "Beans", "Potatoes"
+  "Chicken", "Cheese", "Beans", "Potatoes", "Milk", "Cereal", "Tortilla"
 ];
 
 export default function IngredientsPage() {
