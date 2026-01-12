@@ -1,10 +1,9 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect, Suspense } from "react"; // Added Suspense import
+import { useState, useEffect, Suspense } from "react";
 import { meals } from "../../data/meals";
 
-// --- PART 1: The Logic Component ---
 function ResultsContent() {
   const searchParams = useSearchParams();
   const itemsString = searchParams.get("items");
@@ -76,7 +75,8 @@ function ResultsContent() {
                 padding: "1.5rem",
                 borderRadius: "12px",
                 boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-                position: "relative"
+                position: "relative",
+                background: "white"
               }}
             >
               <h2 style={{ margin: "0 0 0.5rem 0" }}>{meal.name}</h2>
@@ -91,9 +91,22 @@ function ResultsContent() {
                   {meal.energyLevel === "very low" ? "⚡ Very Low" : "😐 Medium"}
                 </span>
               </div>
-              <p style={{ margin: "0 0 1rem 0", color: "#555" }}>
-                <strong>You need:</strong> {meal.ingredients.join(", ")}
-              </p>
+              
+              <div style={{ marginBottom: "1rem" }}>
+                <p style={{ margin: "0 0 0.5rem 0", color: "#555", fontWeight: "bold" }}>Ingredients:</p>
+                <p style={{ margin: 0, color: "#666" }}>{meal.ingredients.join(", ")}</p>
+              </div>
+
+              {/* INSTRUCTIONS SECTION */}
+              <div style={{ background: "#f9f9f9", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
+                <p style={{ margin: "0 0 0.5rem 0", fontWeight: "bold", fontSize: "0.9rem" }}>Steps:</p>
+                <ol style={{ margin: 0, paddingLeft: "1.2rem", color: "#444" }}>
+                    {/* The ? is optional chaining, in case a meal has no instructions yet */}
+                    {meal.instructions?.map((step, idx) => (
+                        <li key={idx} style={{ marginBottom: "5px" }}>{step}</li>
+                    ))}
+                </ol>
+              </div>
 
               <button 
                 onClick={() => toggleSave(meal.id)}
@@ -121,7 +134,6 @@ function ResultsContent() {
   );
 }
 
-// --- PART 2: The Wrapper Component (Export Default) ---
 export default function ResultsPage() {
   return (
     <Suspense fallback={<div style={{padding: "2rem", textAlign: "center"}}>Loading meals...</div>}>

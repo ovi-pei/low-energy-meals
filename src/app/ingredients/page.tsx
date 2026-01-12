@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 
 const STAPLES = [
   "Eggs", "Bread", "Rice", "Noodles", 
-  "Chicken", "Cheese", "Beans", "Potatoes", "Milk", "Cereal", "Tortilla"
+  "Chicken", "Cheese", "Beans", "Potatoes",
+  "Cereal", "Milk", "Tortilla", "Peanut Butter" // Added new staples to match new menu
 ];
 
 export default function IngredientsPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
-  const [energy, setEnergy] = useState<string | null>(null); // New state for energy
+  const [energy, setEnergy] = useState<string | null>(null);
+  const [otherInput, setOtherInput] = useState(""); // New state for text input
 
   const toggleIngredient = (item: string) => {
     if (selected.includes(item)) {
@@ -21,8 +23,16 @@ export default function IngredientsPage() {
   };
 
   const handleFindMeals = () => {
-    const query = selected.join(",");
-    // We now pass BOTH ingredients and energy level to the results page
+    // Combine clicked buttons AND the text input
+    let allIngredients = [...selected];
+    
+    // If they typed something, split by comma (in case they typed "ham, onion")
+    if (otherInput.trim()) {
+        const typedItems = otherInput.split(",").map(i => i.trim());
+        allIngredients = [...allIngredients, ...typedItems];
+    }
+
+    const query = allIngredients.join(",");
     router.push(`/results?items=${query}&energy=${energy}`);
   };
 
@@ -74,7 +84,9 @@ export default function IngredientsPage() {
       {/* 2. INGREDIENTS SECTION */}
       <section style={{ marginBottom: "2rem" }}>
         <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>2. What do you have?</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+        
+        {/* Buttons */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "1rem" }}>
           {STAPLES.map((item) => (
             <button
               key={item}
@@ -92,23 +104,40 @@ export default function IngredientsPage() {
             </button>
           ))}
         </div>
+
+        {/* The "Other" Input */}
+        <div style={{ marginTop: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "5px", fontSize: "0.9rem" }}>Other (type anything else):</label>
+            <input 
+                type="text" 
+                placeholder="e.g. tuna, mayo, yogurt"
+                value={otherInput}
+                onChange={(e) => setOtherInput(e.target.value)}
+                style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem"
+                }}
+            />
+        </div>
       </section>
 
       {/* SUBMIT BUTTON */}
       <div style={{ display: "flex", gap: "1rem" }}>
         <button 
             onClick={handleFindMeals}
-            // Disable button if they haven't picked Energy OR Ingredients
-            disabled={selected.length === 0 || !energy}
+            disabled={(selected.length === 0 && !otherInput) || !energy}
             style={{
                 width: "100%",
                 padding: "1.5rem", 
-                background: (selected.length > 0 && energy) ? "blue" : "#ccc", 
+                background: ((selected.length > 0 || otherInput) && energy) ? "blue" : "#ccc", 
                 color: "white", 
                 border: "none", 
                 borderRadius: "12px",
                 fontSize: "1.2rem",
-                cursor: (selected.length > 0 && energy) ? "pointer" : "not-allowed"
+                cursor: ((selected.length > 0 || otherInput) && energy) ? "pointer" : "not-allowed"
             }}
         >
             Find My Meal
